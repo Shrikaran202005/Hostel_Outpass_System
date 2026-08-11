@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: hostel_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: hostel_user
+      POSTGRES_PASSWORD: hostel_password
+      POSTGRES_DB: hostel_outing_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hostel_backend
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://hostel_user:hostel_password@db:5432/hostel_outing_db
+      JWT_SECRET_KEY: SUPER_SECRET_HOSTEL_OUTING_JWT_KEY_2026_CHANGE_IN_PROD
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hostel_frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
