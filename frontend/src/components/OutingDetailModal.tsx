@@ -3,7 +3,7 @@ import { OutingRequest, ApprovalHistory } from '../types';
 import { outingService } from '../services/outings';
 import { StatusBadge } from './StatusBadge';
 import { Timeline } from './Timeline';
-import { X, Calendar, Clock, MapPin, FileText, UserCheck, ShieldCheck } from 'lucide-react';
+import { X, Calendar, Clock, MapPin, FileText, ShieldCheck } from 'lucide-react';
 
 interface OutingDetailModalProps {
   outing: OutingRequest | null;
@@ -27,6 +27,9 @@ export const OutingDetailModal: React.FC<OutingDetailModalProps> = ({ outing, on
 
   if (!outing) return null;
 
+  const deptName = outing.student?.department?.name || outing.student?.department_name || outing.student?.department_code || 'N/A';
+  const blockName = outing.student?.hostel_block?.name || outing.student?.hostel_block_name || outing.student?.hostel || 'N/A';
+
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
@@ -34,12 +37,12 @@ export const OutingDetailModal: React.FC<OutingDetailModalProps> = ({ outing, on
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
           <div>
             <div className="flex items-center space-x-2">
-              <span className="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">
+              <span className="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded border border-brand-200">
                 Outing #OUT-{outing.id}
               </span>
               <StatusBadge status={outing.status} />
             </div>
-            <h2 className="text-lg font-bold text-slate-900 mt-1">Outing Request Details</h2>
+            <h2 className="text-lg font-bold text-slate-900 mt-1">Outing Details</h2>
           </div>
           <button
             onClick={onClose}
@@ -55,25 +58,35 @@ export const OutingDetailModal: React.FC<OutingDetailModalProps> = ({ outing, on
           {outing.student && (
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/80">
               <h3 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">
-                Student Details
+                Student Profile Information
               </h3>
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div>
-                  <span className="text-slate-500">Name:</span>{' '}
+                  <span className="text-slate-500">Student Name:</span>{' '}
                   <span className="font-semibold text-slate-900">{outing.student.name}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500">Register No:</span>{' '}
-                  <span className="font-semibold text-slate-900">{outing.student.register_number}</span>
+                  <span className="text-slate-500">Register Number:</span>{' '}
+                  <span className="font-semibold text-slate-900">{outing.student.register_number || 'N/A'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500">Hostel:</span>{' '}
-                  <span className="font-semibold text-slate-900">{outing.student.hostel || 'N/A'}</span>
+                  <span className="text-slate-500">Department:</span>{' '}
+                  <span className="font-semibold text-slate-900">{deptName}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500">Room No:</span>{' '}
+                  <span className="text-slate-500">Hostel Block:</span>{' '}
+                  <span className="font-semibold text-slate-900">{blockName}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500">Room Number:</span>{' '}
                   <span className="font-semibold text-slate-900">{outing.student.room_number || 'N/A'}</span>
                 </div>
+                {outing.student.year && (
+                  <div>
+                    <span className="text-slate-500">Year of Study:</span>{' '}
+                    <span className="font-semibold text-slate-900">Year {outing.student.year}</span>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -128,7 +141,7 @@ export const OutingDetailModal: React.FC<OutingDetailModalProps> = ({ outing, on
           {/* Audit Timeline */}
           <div className="pt-4 border-t border-slate-200">
             <h3 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-4">
-              Audit History & Timeline
+              Approval & Audit Timeline
             </h3>
             {loading ? (
               <div className="py-6 text-center text-xs text-slate-400">Loading audit history...</div>

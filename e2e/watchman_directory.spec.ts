@@ -29,36 +29,37 @@ test.describe('Watchman Student Directory and Gate Verification E2E Suite', () =
     // 3. Verify All Students directory section exists
     await expect(page.locator('h2:has-text("All Students")')).toBeVisible();
 
-    // 4. Verify all 3 seeded students appear in All Students table
-    await expect(page.locator('td:has-text("Arjun Raj")')).toBeVisible();
-    await expect(page.locator('td:has-text("Nithya S")')).toBeVisible();
-    await expect(page.locator('td:has-text("Rahul Menon")')).toBeVisible();
+    // 4. Verify all 3 seeded students appear in directory
+    await expect(page.locator('td:has-text("Arjun Raj")').first()).toBeVisible();
+    await expect(page.locator('td:has-text("Nithya S")').first()).toBeVisible();
+    await expect(page.locator('td:has-text("Rahul Menon")').first()).toBeVisible();
 
     // 5. Test Register Number Search
     await page.fill('input[placeholder*="Register Number"]', 'CSE2027001');
     await page.click('button:has-text("Search")');
-    await expect(page.locator('td:has-text("Arjun Raj")')).toBeVisible();
+    await expect(page.locator('td:has-text("Arjun Raj")').first()).toBeVisible();
 
     // Clear search
     await page.click('button:has-text("Clear Search")');
-    await expect(page.locator('td:has-text("Nithya S")')).toBeVisible();
+    await expect(page.locator('td:has-text("Nithya S")').first()).toBeVisible();
 
     // 6. Test Outing ID Search (#OUT-3)
     await page.fill('input[placeholder*="Register Number"]', '#OUT-3');
     await page.click('button:has-text("Search")');
-    await expect(page.locator('td:has-text("#OUT-3")')).toBeVisible();
+    await expect(page.locator('td:has-text("#OUT-3")').first()).toBeVisible();
 
     // Clear search
     await page.click('button:has-text("Clear Search")');
+    await expect(page.locator('td:has-text("Rahul Menon")').first()).toBeVisible();
 
     // 7. Open Student View Modal for Rahul Menon (C Block Student - Outing #OUT-3 APPROVED)
-    await page.click('tr:has-text("Rahul Menon") button:has-text("View")');
+    await page.click('tr:has-text("CSE2027002") button:has-text("View Student")');
 
     // Verify Modal details
     await expect(page.locator('h3:has-text("Rahul Menon")')).toBeVisible();
     await expect(page.locator('text=Reg No: CSE2027002')).toBeVisible();
     await expect(page.locator('text=Active / Recent Outing Record')).toBeVisible();
-    await expect(page.locator('text=#OUT-3')).toBeVisible();
+    await expect(page.locator('text=#OUT-3').first()).toBeVisible();
 
     // Record Exit inside Modal for Approved Outing #OUT-3
     await page.click('div.fixed button:has-text("Record Exit")');

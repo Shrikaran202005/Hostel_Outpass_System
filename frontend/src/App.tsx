@@ -4,11 +4,12 @@ import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import { StudentDashboard } from './pages/StudentDashboard';
 import { HodDashboard } from './pages/HodDashboard';
+import { HodHistory } from './pages/HodHistory';
 import { WardenDashboard } from './pages/WardenDashboard';
+import { WardenHistory } from './pages/WardenHistory';
 import { WatchmanDashboard } from './pages/WatchmanDashboard';
 import { authService } from './services/auth';
 import { Role } from './types';
-
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -24,7 +25,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
   }
 
   if (!allowedRoles.includes(user.role)) {
-    // Redirect to user's proper dashboard if attempting role breach
     switch (user.role) {
       case 'STUDENT':
         return <Navigate to="/student/dashboard" replace />;
@@ -67,7 +67,6 @@ export const App: React.FC = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
 
-
         <Route
           path="/student/dashboard"
           element={
@@ -87,10 +86,28 @@ export const App: React.FC = () => {
         />
 
         <Route
+          path="/hod/history"
+          element={
+            <ProtectedRoute allowedRoles={['HOD']}>
+              <HodHistory />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/warden/dashboard"
           element={
             <ProtectedRoute allowedRoles={['WARDEN']}>
               <WardenDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/warden/history"
+          element={
+            <ProtectedRoute allowedRoles={['WARDEN']}>
+              <WardenHistory />
             </ProtectedRoute>
           }
         />

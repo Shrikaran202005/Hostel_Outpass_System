@@ -94,5 +94,27 @@ export const outingService = {
     const response = await api.get<import('../types').StudentDirectoryItem[]>('/watchman/students', { params });
     return response.data;
   },
+
+  async getHodHistory(params?: { search?: string; status_filter?: string; hostel_block_id?: number }): Promise<OutingRequest[]> {
+    const response = await api.get<OutingRequest[]>('/hod/history', { params });
+    return response.data;
+  },
+
+  async getWardenHistory(params?: { search?: string; status_filter?: string; department_id?: number }): Promise<OutingRequest[]> {
+    const response = await api.get<OutingRequest[]>('/warden/history', { params });
+    return response.data;
+  },
+
+  async getDepartments(): Promise<import('../types').Department[]> {
+    const response = await api.get<import('../types').Department[]>('/departments');
+    return response.data;
+  },
+
+  async getHostelBlocks(): Promise<import('../types').HostelBlock[]> {
+    const response = await api.get<import('../types').HostelBlock[]>('/hostel-blocks');
+    return response.data;
+  },
 };
+
+
 

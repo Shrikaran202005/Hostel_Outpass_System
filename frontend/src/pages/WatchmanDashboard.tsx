@@ -122,14 +122,23 @@ export const WatchmanDashboard: React.FC = () => {
     }
   };
 
-  const handleClearSearch = () => {
+  const handleClearSearch = async () => {
     setSearchQuery('');
     setSearchResults(null);
     setAlertMsg(null);
     setSelectedDeptId('');
     setSelectedBlockId('');
-    fetchStudents();
+    setStudentsLoading(true);
+    try {
+      const data = await outingService.getWatchmanStudents();
+      setStudents(data);
+    } catch (err) {
+      console.error('Failed to fetch student directory', err);
+    } finally {
+      setStudentsLoading(false);
+    }
   };
+
 
   const handleRecordExit = async (outingId: number, studentName?: string) => {
     setAlertMsg(null);
@@ -479,9 +488,10 @@ export const WatchmanDashboard: React.FC = () => {
                           className="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold rounded-lg text-xs transition-colors inline-flex items-center space-x-1 border border-brand-200"
                         >
                           <Eye className="w-3.5 h-3.5" />
-                          <span>View</span>
+                          <span>View Student</span>
                         </button>
                       </td>
+
                     </tr>
                   ))}
                 </tbody>
