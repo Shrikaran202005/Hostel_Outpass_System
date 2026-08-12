@@ -14,7 +14,7 @@ class ApprovalHistory(Base):
     actor_role = Column(SQLEnum(Role), nullable=False)
     action = Column(SQLEnum(ApprovalAction), nullable=False)
     comment = Column(String(500), nullable=True)
-    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
+    timestamp = Column(DateTime, default=datetime.now, nullable=False)
 
     # Relationships
     outing = relationship("OutingRequest", back_populates="history_records")

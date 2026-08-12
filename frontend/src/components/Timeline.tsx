@@ -75,15 +75,15 @@ export const Timeline: React.FC<TimelineProps> = ({ history }) => {
         };
       case 'LATE_RETURN_DETECTED':
         return {
-          title: 'Late Return Flagged',
+          title: 'Late Return Detected',
           icon: <AlertTriangle className="w-4 h-4 text-orange-600" />,
           bgColor: 'bg-orange-100 border-orange-200',
         };
       case 'COMPLETED':
         return {
           title: 'Outing Completed',
-          icon: <CheckCircle2 className="w-4 h-4 text-blue-600" />,
-          bgColor: 'bg-blue-100 border-blue-200',
+          icon: <CheckCircle2 className="w-4 h-4 text-emerald-600" />,
+          bgColor: 'bg-emerald-100 border-emerald-200',
         };
       default:
         return {
@@ -95,8 +95,11 @@ export const Timeline: React.FC<TimelineProps> = ({ history }) => {
   };
 
   const formatTimestamp = (ts: string) => {
+    if (!ts) return '';
     try {
-      const d = new Date(ts);
+      const cleanTs = ts.includes('T') ? ts : ts.replace(' ', 'T');
+      const d = new Date(cleanTs);
+      if (isNaN(d.getTime())) return ts;
       return d.toLocaleString('en-US', {
         month: 'short',
         day: 'numeric',

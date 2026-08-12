@@ -30,6 +30,38 @@ export const OutingDetailModal: React.FC<OutingDetailModalProps> = ({ outing, on
   const deptName = outing.student?.department?.name || outing.student?.department_name || outing.student?.department_code || 'N/A';
   const blockName = outing.student?.hostel_block?.name || outing.student?.hostel_block_name || outing.student?.hostel || 'N/A';
 
+  const formatTimeStr = (t?: string) => {
+    if (!t) return 'N/A';
+    const parts = t.split(':');
+    if (parts.length < 2) return t;
+    let hours = parseInt(parts[0], 10);
+    const minutes = parts[1];
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    return `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+  };
+
+  const getGateReturnTimeStr = (outingObj: OutingRequest) => {
+    const gateLog = outingObj.gate_logs && outingObj.gate_logs.length > 0 ? outingObj.gate_logs[0] : null;
+    if (gateLog && gateLog.return_time) {
+      try {
+        const cleanTs = gateLog.return_time.replace(' ', 'T');
+        const d = new Date(cleanTs);
+        if (!isNaN(d.getTime())) {
+          return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        }
+      } catch {}
+      return gateLog.return_time;
+    }
+    return 'N/A';
+  };
+
+  const getDelayMins = (outingObj: OutingRequest) => {
+    const gateLog = outingObj.gate_logs && outingObj.gate_logs.length > 0 ? outingObj.gate_logs[0] : null;
+    return gateLog?.delay_minutes != null ? gateLog.delay_minutes : 0;
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
@@ -106,7 +138,7 @@ export const OutingDetailModal: React.FC<OutingDetailModalProps> = ({ outing, on
               <div>
                 <span className="block text-[11px] text-slate-400 font-medium">Time Window</span>
                 <span className="text-sm font-semibold text-slate-900">
-                  {outing.leaving_time} - {outing.expected_return_time}
+                  {formatTimeStr(outing.leaving_time)} - {formatTimeStr(outing.expected_return_time)}
                 </span>
               </div>
             </div>
@@ -137,6 +169,51 @@ export const OutingDetailModal: React.FC<OutingDetailModalProps> = ({ outing, on
               </span>
             </div>
           </div>
+
+          {/* Return Status & Gate Details */}
+          {(outing.status === 'COMPLETED' || outing.status === 'LATE_RETURN') && (
+            <div
+              className={`p-4 rounded-xl border ${
+                outing.status === 'LATE_RETURN'
+                  ? 'bg-orange-50/80 border-orange-200'
+                  : 'bg-emerald-50/80 border-emerald-200'
+              }`}
+            >
+              <h4
+                className={`text-xs font-bold uppercase tracking-wider mb-2.5 ${
+                  outing.status === 'LATE_RETURN' ? 'text-orange-800' : 'text-emerald-800'
+                }`}
+              >
+                Return Status & Gate Details
+              </h4>
+              <div className="grid grid-cols-3 gap-3 text-xs">
+                <div>
+                  <span className="text-slate-500 block text-[11px]">Expected Return</span>
+                  <span className="font-semibold text-slate-900 font-mono">
+                    {formatTimeStr(outing.expected_return_time)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block text-[11px]">Actual Return</span>
+                  <span className="font-semibold text-slate-900 font-mono">
+                    {getGateReturnTimeStr(outing)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block text-[11px]">Return Assessment</span>
+                  <span
+                    className={`font-bold ${
+                      outing.status === 'LATE_RETURN' ? 'text-orange-700' : 'text-emerald-700'
+                    }`}
+                  >
+                    {outing.status === 'LATE_RETURN'
+                      ? `Late Return (Delay: ${getDelayMins(outing)} minutes)`
+                      : 'Returned on time'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Audit Timeline */}
           <div className="pt-4 border-t border-slate-200">

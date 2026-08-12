@@ -89,6 +89,7 @@ export interface GateLog {
   watchman_id: number;
   exit_time?: string;
   return_time?: string;
+  delay_minutes?: number;
   status: string;
   created_at: string;
 }

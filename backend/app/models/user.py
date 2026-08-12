@@ -23,8 +23,8 @@ class User(Base):
     hostel = Column(String(100), nullable=True)
     room_number = Column(String(50), nullable=True)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Relationships
     department = relationship("Department", back_populates="users", foreign_keys=[department_id])

@@ -15,8 +15,8 @@ class GateLog(Base):
     return_time = Column(DateTime, nullable=True)
     delay_minutes = Column(Integer, nullable=True, default=0)
     status = Column(SQLEnum(GateStatus), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Relationships
     outing = relationship("OutingRequest", back_populates="gate_logs")

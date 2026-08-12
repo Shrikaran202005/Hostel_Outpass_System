@@ -281,7 +281,7 @@ class OutingService:
                 detail="Student is not authorized to leave the hostel."
             )
 
-        now = datetime.utcnow()
+        now = datetime.now()
 
         # Check existing gate log
         existing_gate_log = db.query(GateLog).filter(GateLog.outing_id == outing.id).first()
@@ -339,27 +339,30 @@ class OutingService:
                 detail="Return has already been recorded for this outing."
             )
 
-        now = datetime.utcnow()
+        now = datetime.now()
         gate_log.return_time = now
 
         # Check if late return: compare actual return against expected return timestamp
         expected_dt = datetime.combine(outing.outing_date, outing.expected_return_time)
         is_late = now > expected_dt
 
+        exp_str = outing.expected_return_time.strftime('%I:%M %p')
+        act_str = now.strftime('%I:%M %p')
+
         if is_late:
             delay_sec = (now - expected_dt).total_seconds()
-            delay_mins = max(1, int(delay_sec // 60))
+            delay_mins = max(1, int(round(delay_sec / 60.0)))
             gate_log.delay_minutes = delay_mins
             outing.status = OutingStatus.LATE_RETURN
             gate_log.status = GateStatus.LATE_RETURN
             history_action = ApprovalAction.LATE_RETURN_DETECTED
-            comment = f"Student returned late at gate by {delay_mins} minute(s) at {now.strftime('%I:%M %p')} (Expected: {outing.expected_return_time.strftime('%I:%M %p')})."
+            comment = f"Expected Return: {exp_str} | Actual Return: {act_str} | Delay: {delay_mins} minutes"
         else:
             gate_log.delay_minutes = 0
             outing.status = OutingStatus.COMPLETED
             gate_log.status = GateStatus.COMPLETED
             history_action = ApprovalAction.COMPLETED
-            comment = f"Student return recorded at gate at {now.strftime('%I:%M %p')}. Outing completed."
+            comment = f"Student returned on time at {act_str}. Outing completed."
 
         history_return = ApprovalHistory(
             outing_id=outing.id,

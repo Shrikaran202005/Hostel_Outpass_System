@@ -17,8 +17,8 @@ class OutingRequest(Base):
     reason = Column(String(500), nullable=False)
     status = Column(SQLEnum(OutingStatus), nullable=False, default=OutingStatus.PENDING_HOD)
     parent_approval_confirmed = Column(Boolean, default=False, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Relationships
     student = relationship("User", back_populates="outings", foreign_keys=[student_id])
