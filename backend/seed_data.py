@@ -178,6 +178,11 @@ def seed_database():
                 ApprovalHistory(outing_id=o3.id, actor_id=warden_c.id, actor_role=Role.WARDEN, action=ApprovalAction.WARDEN_APPROVED, comment="Final approval granted by C Block Warden.")
             ])
             db.commit()
+        else:
+            o3.status = OutingStatus.APPROVED
+            o3.outing_date = today
+            db.query(GateLog).filter(GateLog.outing_id == o3.id).delete()
+            db.commit()
 
         print("Database successfully verified/seeded idempotently.")
     finally:

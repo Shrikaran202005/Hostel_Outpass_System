@@ -27,8 +27,8 @@ test.describe('HOD & Warden Role-Scoped Outing History E2E Suite', () => {
     await expect(page.locator('text=Department: Computer Science and Engineering')).toBeVisible();
 
     // Verify Arjun Raj (CSE) and Rahul Menon (CSE) are visible
-    await expect(page.locator('td:has-text("Arjun Raj")')).toBeVisible();
-    await expect(page.locator('td:has-text("Rahul Menon")')).toBeVisible();
+    await expect(page.locator('td:has-text("Arjun Raj")').first()).toBeVisible();
+    await expect(page.locator('td:has-text("Rahul Menon")').first()).toBeVisible();
 
     // Verify Nithya S (ECE) is NOT visible
     await expect(page.locator('td:has-text("Nithya S")')).not.toBeVisible();
@@ -90,7 +90,7 @@ test.describe('HOD & Warden Role-Scoped Outing History E2E Suite', () => {
     await expect(page.locator('text=Hostel Block: A Block')).toBeVisible();
 
     // Verify Arjun Raj (A Block) is visible
-    await expect(page.locator('td:has-text("Arjun Raj")')).toBeVisible();
+    await expect(page.locator('td:has-text("Arjun Raj")').first()).toBeVisible();
 
     // Verify Rahul Menon (C Block) and Nithya S (B Block) are NOT visible
     await expect(page.locator('td:has-text("Rahul Menon")')).not.toBeVisible();
