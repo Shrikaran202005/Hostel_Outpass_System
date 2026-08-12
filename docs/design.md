@@ -1,179 +1,268 @@
 # System Design
 
-## 1. Problem Statement
-
-Collegiate hostels historically rely on manual paper outing slips, physical registers, and unstructured phone coordination to grant students permission to leave campus. This leads to approval bottlenecks, verification difficulties at the gate, untracked late returns, and lack of administrative audit history.
+This document details the visual UI design, user experience patterns, component hierarchy, page layouts, and operational mechanisms implemented across the **Hostel Outing Permission & Approval Management System**.
 
 ---
 
-## 2. System Goals
+## 1. Design Goals
 
-1. **Digitize Outing Approvals**: Replace paper slips with a role-based approval pipeline.
-2. **Eliminate Approval Delays**: Enable HODs and Wardens to review requests asynchronously.
-3. **Enforce Parent Approval Verification**: Ensure Wardens confirm parent/guardian consent before granting final approval.
-4. **Instant Gate Verification**: Provide Watchmen with real-time student directory lookup and approval status checking at campus gates.
-5. **Automate Late Return Detection**: Automatically flag late returns and log exact delay minutes.
-6. **Role-Scoped Transparency**: Provide HODs (department-scoped) and Wardens (hostel-block-scoped) with read-only historical reports.
+1. **Role-Driven Clarity**: Tailor every screen to the logged-in user's exact responsibilities (`STUDENT`, `HOD`, `WARDEN`, `WATCHMAN`).
+2. **Zero Training Requirement**: Provide intuitive cards, distinct call-to-action buttons, clear labels, and visual status indicators.
+3. **Safety & Audit Transparency**: Emphasize mandatory steps (such as Warden parent confirmation) and present full audit timelines.
+4. **Responsive Performance**: Ensure layout responsiveness across desktop monitors, tablets, and mobile screen viewports.
 
 ---
 
-## 3. System Users
+## 2. User Experience
 
-- **Student**: Raises outing requests, tracks progress, cancels pending requests.
-- **HOD (Head of Department)**: Evaluates academic outing validity for department students.
-- **Warden**: Verifies parent consent by phone/in person and grants final block approval.
-- **Watchman (Gate Officer)**: Scans/searches students at the main gate, records exit and return times.
-
----
-
-## 4. Functional Requirements
-
-- **Registration & Auth**: Multi-role signup (`STUDENT`, `HOD`, `WARDEN`) with automatic department and block linking; Watchman accounts provisioned securely.
-- **Outing Request Lifecycle**: `PENDING_HOD` -> `PENDING_WARDEN` -> `APPROVED` -> `EXITED` -> `COMPLETED` / `LATE_RETURN`.
-- **Parent Confirmation Enforcement**: Final Warden approval rejected unless `parent_approval_confirmed == True`.
-- **Main Gate Verification & Directory**: Watchman directory search by Register Number, Outing ID, or Name, displaying student photos, profile details, and gate movement buttons.
-- **Role-Scoped Outing History**: Dedicated `/hod/history` and `/warden/history` dashboards with summary statistics cards, search, status filters, block/dept filters, and detailed audit timelines.
+The user experience follows modern web design standards:
+- **Color Palette**: Dark Slate background (`slate-900`/`slate-800`), crisp card surface containers, and vibrant role-based color accents (Indigo for Students, Purple for HODs, Emerald for Wardens, Amber/Teal for Watchmen).
+- **Feedback & Alerts**: Toast notifications and inline dismissible banners communicate action results (success, warning, error) instantly.
+- **Interactive Elements**: Micro-animations, smooth hover states, responsive cards, and clean modal dialog overlays.
 
 ---
 
-## 5. Business Rules
+## 3. Role-Based Dashboards
 
-### Student Rules
-- Outing date cannot be in the past.
-- Leaving time must be strictly before expected return time.
-- Cannot create overlapping active outing requests.
-- Can cancel requests in `PENDING_HOD` or `PENDING_WARDEN` status.
-
-### HOD Rules
-- HOD can only process requests for students in their assigned department (`User.department_id`).
-- Approving a request advances status to `PENDING_WARDEN`.
-- Rejecting a request terminates the workflow with `REJECTED`.
-
-### Warden Rules
-- Warden can only process requests for students in their assigned hostel block (`User.hostel_block_id`).
-- Must explicitly confirm parent consent (`parent_approval_confirmed = True`) before granting final approval.
-- Final approval advances status to `APPROVED`.
-
-### Watchman Rules
-- Exit can only be recorded for requests in `APPROVED` status.
-- Return can only be recorded for requests in `EXITED` status.
-- Watchman cannot approve or reject outing requests.
-
-### Late Return Rules
-- When return is recorded, if `actual_return_time > expected_return_time`, outing status is marked `LATE_RETURN`.
-- Late students are NEVER blocked from entering the gate; the system records the delay and updates audit history.
+The application provides dedicated dashboards mapped to each authenticated role:
+- **Student Dashboard** (`/student`): Focused on outing creation, active request cards, status progress, and personal history inspection.
+- **HOD Dashboard** (`/hod`): Focused on academic review of pending department requests with approval/rejection comments.
+- **Warden Dashboard** (`/warden`): Focused on block-scoped requests, mandatory parent approval verification, and final clearance.
+- **Watchman Gate Desk** (`/watchman`): High-efficiency desk for student search, directory browsing, gate exit logging, and gate return recording.
 
 ---
 
-## 6. Non-Functional Requirements
+## 4. Navigation Structure
 
-- **Security**: Passwords hashed with bcrypt; JWT tokens with role claims; HTTPS/TLS transport.
-- **Reliability**: Deterministic database transactions; rollback on validation errors.
-- **Maintainability**: Modular layered architecture (UI, API Service, Data Access).
-- **Usability**: Responsive, accessible Tailwind UI with status badges and micro-animations.
-- **Auditability**: Immutable audit trail for every status transition and gate event.
-- **Performance**: Instant search indexing and sub-100ms API response times.
+Navigation is managed via `Navbar.tsx` and React Router DOM:
+- **Global Header**: Displays the system title, current user name, role badge, department/block tags, and a **Logout** button.
+- **Tab Navigation**: HODs and Wardens have quick toggle buttons between **Active Pending** requests and **Role History** view pages (`/hod/history` and `/warden/history`).
 
 ---
 
-## 7. Data Model & Relationships
+## 5. Authentication UI
 
-```mermaid
-erDiagram
-    DEPARTMENTS ||--o{ USERS : "has_students_and_hods"
-    HOSTEL_BLOCKS ||--o{ USERS : "houses_students_and_wardens"
-    USERS ||--o{ OUTING_REQUESTS : "creates"
-    OUTING_REQUESTS ||--o{ APPROVAL_HISTORY : "tracks_audit"
-    OUTING_REQUESTS ||--o{ GATE_LOGS : "logs_movement"
+**Page Component**: `frontend/src/pages/LoginPage.tsx`
 
-    DEPARTMENTS {
-        int id PK
-        string name
-        string code UK
-    }
-
-    HOSTEL_BLOCKS {
-        int id PK
-        string name UK
-    }
-
-    USERS {
-        int id PK
-        string name
-        string register_number UK
-        string email UK
-        string password_hash
-        string role
-        int department_id FK
-        int hostel_block_id FK
-        int year
-        string room_number
-        boolean is_active
-    }
-
-    OUTING_REQUESTS {
-        int id PK
-        int student_id FK
-        date outing_date
-        time leaving_time
-        time expected_return_time
-        string destination
-        string reason
-        string status
-        boolean parent_approval_confirmed
-    }
-
-    APPROVAL_HISTORY {
-        int id PK
-        int outing_id FK
-        int actor_id FK
-        string actor_role
-        string action
-        string comment
-        datetime timestamp
-    }
-
-    GATE_LOGS {
-        int id PK
-        int outing_id FK
-        int watchman_id FK
-        datetime exit_time
-        datetime return_time
-        int delay_minutes
-        string status
-    }
-```
+- **Visual Layout**: Centered card overlay on a dark gradient background with a prominent lock icon and system title.
+- **Features**:
+  - Email & Password input fields.
+  - Role switcher helper buttons for quick demo login credentials filling.
+  - Demo Credentials Reference Table displaying sample logins for Student, HOD, Warden, and Watchman roles.
+  - Quick link to the **Sign Up** page.
 
 ---
 
-## 8. UI Design Standards
+## 6. Signup UI
 
-- Modern dark/light UI palette using Slate, Brand Indigo/Purple, Emerald, Rose, and Amber accents.
-- Responsive container layouts using Tailwind CSS.
-- Modal dialogs for detailed student audit timeline inspection.
-- Accessible ARIA labels and status indicators (`StatusBadge.tsx`).
+**Page Component**: `frontend/src/pages/SignupPage.tsx`
 
----
-
-## 9. Error Handling Strategy
-
-- **API Layer**: Standardized JSON error responses (`HTTP 400`, `HTTP 401`, `HTTP 403`, `HTTP 404`).
-- **Frontend Layer**: Inline alert banners and toast notifications displaying user-friendly error messages without crashing UI state.
+- **Visual Layout**: Structured multi-column registration form with dynamic field switching based on selected role.
+- **Supported Roles for Registration**: `STUDENT`, `HOD`, `WARDEN`.
+- **Dynamic Field Dependencies**:
+  - Selecting `STUDENT`: Requires Full Name, Email, Password, Confirm Password, Register Number, Department, Hostel Block, Academic Year, and Room Number.
+  - Selecting `HOD`: Requires Department assignment (Hostel Block & Register Number hidden).
+  - Selecting `WARDEN`: Requires Hostel Block assignment (Department & Register Number hidden).
+- **Validation**: Enforces password matching, valid email formatting, and required field completion.
 
 ---
 
-## 10. Testing Strategy
+## 7. Student Dashboard
 
-- **Backend Unit & Integration Tests**: Pytest suite executing 74 automated tests covering auth, workflow transitions, security scoping, seed verification, and late return detection.
-- **Frontend E2E Tests**: Playwright suite executing 8 end-to-end browser scenarios covering multi-role signup, full outing approval lifecycle, Watchman directory operations, and role-scoped history scoping.
-- **Build Verification**: TypeScript strict mode (`tsc --noEmit`) and Vite production bundler validation.
+**Page Component**: `frontend/src/pages/StudentDashboard.tsx`
+
+- **Header Section**: Displays student profile overview (Name, Register Number, Department, Hostel Block, Room Number).
+- **Outing Request Action Card**: Prominent **+ New Outing Request** button opening the creation form:
+  - Date Picker (`outing_date`): Minimum date set to today.
+  - Time Pickers (`leaving_time` & `expected_return_time`).
+  - Destination input & Reason textarea.
+- **Active Outings Section**: Grid of active outing cards displaying current status badges (`PENDING_HOD`, `PENDING_WARDEN`, `APPROVED`, `EXITED`).
+- **Cancellation Action**: Eligible pending requests (`PENDING_HOD` or `PENDING_WARDEN`) feature a **Cancel Request** button.
+- **Personal History Button**: Opens a modal displaying historical outings and full audit timelines.
 
 ---
 
-## 11. Stage 3 AI Development Loop
+## 8. HOD Dashboard
 
-Late Return Detection was introduced using an AI-assisted development loop:
-1. **Requirement Injection**: Defined business rule comparing actual return vs expected return timestamp.
-2. **Red Run**: Ran test suite catching explicit `AssertionError` (`assert 'COMPLETED' == 'LATE_RETURN'`).
-3. **AI Root Cause Analysis & Fix**: Updated timestamp comparison in `OutingService.watchman_record_return`.
-4. **Green Run**: Verified 100% test pass rate across backend pytest and Playwright E2E suites.
+**Page Component**: `frontend/src/pages/HodDashboard.tsx`
+
+- **Header Section**: Shows HOD profile, assigned department badge (`CSE` or `ECE`), and total pending request counter.
+- **Pending Outings List**: Displays pending requests (`PENDING_HOD`) submitted by department students:
+  - Student card details: Name, Register Number, Academic Year, Hostel Block, Destination, Reason, Date, Leaving & Return times.
+  - Optional HOD Comment input field.
+  - **Approve Button**: Advances request to `PENDING_WARDEN`.
+  - **Reject Button**: Terminates request with `REJECTED`.
+
+---
+
+## 9. HOD History
+
+**Page Component**: `frontend/src/pages/HodHistory.tsx`
+
+- **Analytical Summary Cards**: Total Department Outings, Approved Count, Rejected Count, Late Returns Count.
+- **Controls & Filters**:
+  - Search Bar: Filters by student name, register number, or outing ID `#OUT-X`.
+  - Status Filter Dropdown (`PENDING_HOD`, `PENDING_WARDEN`, `APPROVED`, `REJECTED`, `CANCELLED`, `EXITED`, `COMPLETED`, `LATE_RETURN`).
+  - Hostel Block Filter Dropdown.
+- **Outings Data Table / Cards**: Lists complete department history with audit timeline inspect buttons.
+
+---
+
+## 10. Warden Dashboard
+
+**Page Component**: `frontend/src/pages/WardenDashboard.tsx`
+
+- **Header Section**: Shows Warden profile, assigned hostel block badge (`A Block`, `B Block`, or `C Block`), and pending count.
+- **Pending Requests List**: Displays HOD-approved requests (`PENDING_WARDEN`) for block residents.
+- **Mandatory Parent Confirmation UI**:
+  - Interactive Checkbox: `[ ] Parent / Guardian Approval Confirmed by Phone`.
+  - **Parent Contact Button**: Quick trigger to mark parent confirmation status (`POST /api/warden/outings/{id}/parent-confirmation`).
+- **Action Buttons**:
+  - **Approve Outing**: Enabled only after parent confirmation checkbox is checked. Advances status to `APPROVED`.
+  - **Reject Outing**: Rejects request with optional reason.
+
+---
+
+## 11. Warden History
+
+**Page Component**: `frontend/src/pages/WardenHistory.tsx`
+
+- **Analytical Summary Cards**: Total Block Outings, Approved Count, Exited Count, Completed Count, Late Returns Count.
+- **Controls & Filters**: Search bar (name/ID), Status filter, Department filter.
+- **Outings Data Table**: Displays historical block records, parent confirmation timestamps, and late return delay indicators.
+
+---
+
+## 12. Watchman Dashboard
+
+**Page Component**: `frontend/src/pages/WatchmanDashboard.tsx`
+
+- **Operational Layout**: High-efficiency dual-section layout for main gate security officers.
+- **Today's Active Outings Section**: Displays students currently authorized to exit or return:
+  - Displays student avatar icon, Name, Register Number, Department, Hostel Block, Outing ID.
+  - **Record Exit Button**: Enabled when status is `APPROVED`. Updates status to `EXITED`.
+  - **Record Return Button**: Enabled when status is `EXITED`. Updates status to `COMPLETED` or `LATE_RETURN`.
+
+---
+
+## 13. Student Directory
+
+**Integrated Component**: `WatchmanDashboard.tsx` (Directory Tab)
+
+- **Purpose**: Campus-wide student lookup desk for Watchman security verification.
+- **Features**:
+  - Live Search Bar: Real-time search across student register numbers, names, and emails.
+  - Department & Hostel Block Filter Dropdowns.
+  - Student Directory Grid: Displays student cards with year, room number, current active outing status, and quick action buttons.
+
+---
+
+## 14. Outing Details Modal
+
+**Component**: `frontend/src/components/OutingDetailModal.tsx`
+
+- **Overlay Window**: Displays complete outing metadata:
+  - Student Information: Name, Register Number, Department, Hostel Block, Room Number.
+  - Outing Information: Date, Leaving Time, Expected Return Time, Destination, Reason.
+  - Current Status & Parent Approval Status.
+  - **Audit Timeline Component**: Full audit log visualization.
+
+---
+
+## 15. Audit Timeline
+
+**Component**: `frontend/src/components/Timeline.tsx`
+
+- **Visual Design**: Vertical chronological timeline with connected icon nodes.
+- **Timeline Nodes**:
+  - `SUBMITTED`: Blue icon node.
+  - `HOD_APPROVED` / `WARDEN_APPROVED`: Green checkmark nodes.
+  - `PARENT_APPROVAL_CONFIRMED`: Purple phone checkmark node.
+  - `EXIT_RECORDED`: Amber gate node.
+  - `RETURN_RECORDED` / `COMPLETED`: Emerald arrival node.
+  - `LATE_RETURN_DETECTED`: Orange warning node with delay minutes badge.
+  - `REJECTED` / `CANCELLED`: Red cross nodes.
+- **Node Content**: Action title, actor name, actor role badge, comment string, formatted timestamp.
+
+---
+
+## 16. Status Badges
+
+**Component**: `frontend/src/components/StatusBadge.tsx`
+
+The system uses standard status pill badges:
+
+| Status Key | Badge Color Styling | Visual Label |
+| :--- | :--- | :--- |
+| `PENDING_HOD` | `bg-amber-500/10 text-amber-400 border-amber-500/20` | Pending HOD |
+| `PENDING_WARDEN` | `bg-purple-500/10 text-purple-400 border-purple-500/20` | Pending Warden |
+| `PENDING_WARDEN_ASSIGNMENT` | `bg-purple-500/10 text-purple-400 border-purple-500/20` | Pending Warden Assignment |
+| `APPROVED` | `bg-emerald-500/10 text-emerald-400 border-emerald-500/20` | Approved |
+| `REJECTED` | `bg-rose-500/10 text-rose-400 border-rose-500/20` | Rejected |
+| `CANCELLED` | `bg-slate-500/10 text-slate-400 border-slate-500/20` | Cancelled |
+| `EXITED` | `bg-blue-500/10 text-blue-400 border-blue-500/20` | Exited (Off Campus) |
+| `COMPLETED` | `bg-green-500/10 text-green-400 border-green-500/20` | Completed |
+| `LATE_RETURN` | `bg-orange-500/10 text-orange-400 border-orange-500/20` | Late Return |
+
+---
+
+## 17. Parent Approval Confirmation
+
+- **UX Design**: Prominent checkbox and action button in `WardenDashboard.tsx`.
+- **Enforcement**: Final **Approve Outing** button remains disabled or returns backend `HTTP 400` until parent consent is explicitly confirmed.
+- **Audit Logging**: Appends a `PARENT_APPROVAL_CONFIRMED` event to the audit timeline.
+
+---
+
+## 18. Gate Exit / Return UI
+
+- **Watchman Interface**:
+  - **Exit Action**: Highlighted blue **Record Exit** button for `APPROVED` outings.
+  - **Return Action**: Highlighted emerald **Record Return** button for `EXITED` outings.
+- **Confirmation Feedback**: Toast alert notifies the Watchman upon successful recording. If return is late, a warning alert displays the delay minutes.
+
+---
+
+## 19. Late-Return Presentation
+
+- **Badge Styling**: High-contrast orange badge (`LATE_RETURN`).
+- **Delay Display**: Renders explicit delay duration in minutes (e.g. `Late Return (Delay: 35 mins)`).
+- **Timeline Detail**: Displays `Expected Return`, `Actual Return`, and computed delay minutes.
+
+---
+
+## 20. Responsive Design
+
+- Built with Tailwind CSS responsive grid utilities (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3`).
+- Navigation bar collapses cleanly into standard mobile layouts.
+- Tables feature horizontal scroll containers (`overflow-x-auto`) to prevent layout breaking on mobile devices.
+
+---
+
+## 21. Error Handling
+
+- **API Interceptor**: Captures `HTTP 401 Unauthorized` responses and redirects to `/login`.
+- **Inline Alert Banners**: Displays specific backend error messages (e.g., "Overlapping outing request exists", "Leaving time must be before expected return time") directly above form inputs.
+
+---
+
+## 22. Validation
+
+- **Frontend Validation**: React form state checks required fields, non-matching passwords, and past dates before dispatching requests.
+- **Backend Validation**: Pydantic models validate request payloads; `OutingService` enforces business constraints.
+
+---
+
+## 23. Security Considerations
+
+- Passwords hashed using Bcrypt with salt rounds.
+- Tokens stored securely in browser `localStorage` and sent via standard HTTP Authorization headers.
+- Backend strictly enforces department and block authorization boundaries on all data endpoints.
+
+---
+
+## 24. Accessibility Considerations
+
+- High contrast text-to-background ratios conforming to WCAG standards.
+- Semantic HTML tags (`<nav>`, `<header>`, `<main>`, `<section>`, `<article>`, `<button>`).
+- Focus states and keyboard-navigable form inputs and buttons.

@@ -100,7 +100,8 @@ export const Timeline: React.FC<TimelineProps> = ({ history }) => {
       const cleanTs = ts.includes('T') ? ts : ts.replace(' ', 'T');
       const d = new Date(cleanTs);
       if (isNaN(d.getTime())) return ts;
-      return d.toLocaleString('en-US', {
+      return d.toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
         month: 'short',
         day: 'numeric',
         hour: 'numeric',

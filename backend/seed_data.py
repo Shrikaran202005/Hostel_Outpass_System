@@ -179,9 +179,13 @@ def seed_database():
             ])
             db.commit()
         else:
+            # Ensure seeded fixture outing #3 status remains APPROVED for E2E gate testing
             o3.status = OutingStatus.APPROVED
             o3.outing_date = today
-            db.query(GateLog).filter(GateLog.outing_id == o3.id).delete()
+            o3.parent_approval_confirmed = True
+            gate_log = db.query(GateLog).filter(GateLog.outing_id == o3.id).first()
+            if gate_log:
+                db.delete(gate_log)
             db.commit()
 
         print("Database successfully verified/seeded idempotently.")

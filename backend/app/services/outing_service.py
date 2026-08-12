@@ -70,7 +70,8 @@ class OutingService:
             actor_id=student.id,
             actor_role=Role.STUDENT,
             action=ApprovalAction.SUBMITTED,
-            comment="Outing request submitted by student."
+            comment="Outing request submitted by student.",
+            timestamp=datetime.now()
         )
         db.add(history)
         db.commit()
@@ -101,7 +102,8 @@ class OutingService:
             actor_id=student.id,
             actor_role=Role.STUDENT,
             action=ApprovalAction.CANCELLED,
-            comment="Request cancelled by student."
+            comment="Request cancelled by student.",
+            timestamp=datetime.now()
         )
         db.add(history)
         db.commit()
@@ -141,7 +143,8 @@ class OutingService:
             actor_id=hod_user.id,
             actor_role=Role.HOD,
             action=ApprovalAction.HOD_APPROVED,
-            comment=comment or ("Approved by HOD." if active_warden else "Approved by HOD. Awaiting Warden assignment for hostel block.")
+            comment=comment or ("Approved by HOD." if active_warden else "Approved by HOD. Awaiting Warden assignment for hostel block."),
+            timestamp=datetime.now()
         )
         db.add(history)
         db.commit()
@@ -169,7 +172,8 @@ class OutingService:
             actor_id=hod_user.id,
             actor_role=Role.HOD,
             action=ApprovalAction.HOD_REJECTED,
-            comment=comment or "Rejected by HOD."
+            comment=comment or "Rejected by HOD.",
+            timestamp=datetime.now()
         )
         db.add(history)
         db.commit()
@@ -200,7 +204,8 @@ class OutingService:
             actor_id=warden_user.id,
             actor_role=Role.WARDEN,
             action=ApprovalAction.PARENT_APPROVAL_CONFIRMED,
-            comment="Parent approval confirmed by Warden."
+            comment="Parent approval confirmed by Warden.",
+            timestamp=datetime.now()
         )
         db.add(history)
         db.commit()
@@ -234,7 +239,8 @@ class OutingService:
             actor_id=warden_user.id,
             actor_role=Role.WARDEN,
             action=ApprovalAction.WARDEN_APPROVED,
-            comment=comment or "Approved by Warden."
+            comment=comment or "Approved by Warden.",
+            timestamp=datetime.now()
         )
         db.add(history)
         db.commit()
@@ -261,7 +267,8 @@ class OutingService:
             actor_id=warden_user.id,
             actor_role=Role.WARDEN,
             action=ApprovalAction.WARDEN_REJECTED,
-            comment=comment or "Rejected by Warden."
+            comment=comment or "Rejected by Warden.",
+            timestamp=datetime.now()
         )
         db.add(history)
         db.commit()
@@ -307,7 +314,8 @@ class OutingService:
             actor_id=watchman_user.id,
             actor_role=Role.WATCHMAN,
             action=ApprovalAction.EXIT_RECORDED,
-            comment=f"Student exit recorded at gate by {watchman_user.name}."
+            comment=f"Student exit recorded at gate by {watchman_user.name}.",
+            timestamp=datetime.now()
         )
         db.add(history)
         db.commit()
@@ -362,14 +370,23 @@ class OutingService:
             outing.status = OutingStatus.COMPLETED
             gate_log.status = GateStatus.COMPLETED
             history_action = ApprovalAction.COMPLETED
-            comment = f"Student returned on time at {act_str}. Outing completed."
+            if now < expected_dt:
+                early_sec = (expected_dt - now).total_seconds()
+                early_mins = int(round(early_sec / 60.0))
+                if early_mins > 0:
+                    comment = f"Student returned {early_mins} minute(s) early at {act_str}. Outing completed."
+                else:
+                    comment = f"Student returned on time at {act_str}. Outing completed."
+            else:
+                comment = f"Student returned on time at {act_str}. Outing completed."
 
         history_return = ApprovalHistory(
             outing_id=outing.id,
             actor_id=watchman_user.id,
             actor_role=Role.WATCHMAN,
             action=ApprovalAction.RETURN_RECORDED,
-            comment=f"Student return recorded by {watchman_user.name}."
+            comment=f"Student return recorded by {watchman_user.name}.",
+            timestamp=datetime.now()
         )
         db.add(history_return)
 
@@ -378,7 +395,8 @@ class OutingService:
             actor_id=watchman_user.id,
             actor_role=Role.WATCHMAN,
             action=history_action,
-            comment=comment
+            comment=comment,
+            timestamp=datetime.now()
         )
         db.add(history_complete)
 

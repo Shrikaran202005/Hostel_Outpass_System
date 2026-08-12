@@ -156,3 +156,19 @@ def test_9_student_cannot_mark_own_return(client, seed_users, db):
     assert forbidden_resp.status_code == 403
 
 
+# TEST 10: Each history event has its own distinct timestamp
+def test_10_each_history_event_has_own_timestamp(client, seed_users, db):
+    outing_id, h_student, _, _, h_watchman = _create_and_exit_outing(client, seed_users, expected_return_str="00:00:01")
+    client.post(f"/api/watchman/outings/{outing_id}/return", headers=h_watchman)
+
+    hist_resp = client.get(f"/api/outings/{outing_id}/history", headers=h_student)
+    assert hist_resp.status_code == 200
+    records = hist_resp.json()
+    assert len(records) >= 5
+    timestamps = [r["timestamp"] for r in records]
+    assert len(timestamps) == len(records)
+    for ts in timestamps:
+        assert ts is not None and len(ts) > 0
+
+
+
