@@ -88,7 +88,7 @@ Experience the live application deployed on production cloud infrastructure:
 
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Netlify-00C7B7?style=for-the-badge)](https://hosteoutpass.netlify.app)
 [![API Docs](https://img.shields.io/badge/📚_API_Docs-Swagger-85EA2D?style=for-the-badge&logoColor=black)](https://hostel-outpass-system-iq9k.onrender.com/docs)
-[![Video Demo](https://img.shields.io/badge/🎥_Video_Demo-Watch_Now-FF0000?style=for-the-badge&logo=youtube)](YOUTUBE_OR_GOOGLE_DRIVE_VIDEO_LINK)
+[![Video Demo](https://img.shields.io/badge/🎥_Video_Demo-Watch_Now-FF0000?style=for-the-badge&logo=youtube)](Presentation/Presentation-demo-vedio.mp4)
 [![Source Code](https://img.shields.io/badge/💻_Source_Code-GitHub-181717?style=for-the-badge&logo=github)](GITHUB_REPOSITORY_URL)
 
 ---
@@ -504,7 +504,7 @@ During implementation of automated late return calculation:
 
 Watch the complete demonstration of the system in action:
 
-🎥 **[Watch Full Video Demonstration](YOUTUBE_OR_GOOGLE_DRIVE_VIDEO_LINK)**
+🎥 **[Watch Full Video Demonstration](Presentation/Presentation-demo-vedio.mp4)**
 
 ### Featured Workflow Demonstrations:
 1. **Student Login & Submission:** Creating an outpass request.
