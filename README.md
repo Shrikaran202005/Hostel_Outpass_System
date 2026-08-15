@@ -46,8 +46,7 @@
 - [20. Challenges & Solutions](#20-challenges--solutions)
 - [21. Future Enhancements](#21-future-enhancements)
 - [22. Contribution Guide](#22-contribution-guide)
-- [23. License](#23-license)
-- [24. Author](#24-author)
+- [23. Author](#24-author)
 
 ---
 
@@ -590,13 +589,7 @@ Contributions are welcome! Follow these steps to contribute:
 
 ---
 
-## 23. License
-
-Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
-
----
-
-## 24. Author
+## 23. Author
 
 **Shrikaran**  
 *B.Tech in Computer Science and Engineering*  
