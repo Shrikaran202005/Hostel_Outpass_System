@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 # Hostel Outpass System
-=======
-<img width="1920" height="1080" alt="Screenshot (194)" src="https://github.com/user-attachments/assets/0057ba81-82f7-440d-8ca2-c9e33e415008" /># Hostel Outpass System
->>>>>>> 7e6cd309642f878d65690cbcb44758bfc85e5320
 
 > **Smart Hostel Outing Permission & Gate Management System**
 >
