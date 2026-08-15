@@ -3,6 +3,12 @@
   publish = "dist"
   command = "npm run build"
 
+# Proxy /api requests to live Render backend
+[[redirects]]
+  from = "/api/*"
+  to = "https://hostel-outpass-system-iq9k.onrender.com/api/:splat"
+  status = 200
+
 # SPA routing redirect for React Router
 [[redirects]]
   from = "/*"
