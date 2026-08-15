@@ -1,9 +1,10 @@
+<img width="1920" height="1080" alt="Screenshot (194)" src="https://github.com/user-attachments/assets/0057ba81-82f7-440d-8ca2-c9e33e415008" />
+
 # Hostel Outpass System
 
 > **Smart Hostel Outing Permission & Gate Management System**
 >
 > A production-grade, full-stack web application designed to digitize, streamline, and secure the end-to-end hostel outing permission workflow, multi-level hierarchy approval process, gate entry/exit verification, and student movement tracking in educational institutions.
-
 ---
 
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
