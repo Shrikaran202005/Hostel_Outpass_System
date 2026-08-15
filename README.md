@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Hostel Outpass System
+=======
+<img width="1920" height="1080" alt="Screenshot (194)" src="https://github.com/user-attachments/assets/0057ba81-82f7-440d-8ca2-c9e33e415008" /># Hostel Outpass System
+>>>>>>> 7e6cd309642f878d65690cbcb44758bfc85e5320
 
 > **Smart Hostel Outing Permission & Gate Management System**
 >
@@ -517,6 +521,7 @@ Watch the complete demonstration of the system in action:
 ## 18. Screenshots
 
 ### Login Page
+<<<<<<< HEAD
 ![Login Page](docs/screenshots/login.png)
 
 ### Student Dashboard
@@ -533,6 +538,24 @@ Watch the complete demonstration of the system in action:
 
 ### Gate Movement Logs
 ![Gate Logs](docs/screenshots/gate-logs.png)
+=======
+![Login Page](Public/login.png)
+
+### Student Dashboard
+![Student Dashboard](Public/student-dashboard.png)
+
+### HOD Dashboard
+![HOD Dashboard](Public/hod-dashboard.png)
+
+### Warden Dashboard
+![Warden Dashboard](Public/warden-dashboard.png)
+
+### Watchman Gate Dashboard
+![Watchman Dashboard](Public/watchman-dashboard.png)
+
+### Gate Movement Logs
+![Gate Logs](Public/gate-logs.png)
+>>>>>>> 7e6cd309642f878d65690cbcb44758bfc85e5320
 
 ---
 
@@ -599,12 +622,21 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 **Shrikaran**  
 *B.Tech in Computer Science and Engineering*  
+<<<<<<< HEAD
 SRM Institute of Science and Technology (Class of 2027)
 
 - 🐙 **GitHub:** [github.com/Shrikaran202005](https://github.com/Shrikaran202005)
 - 💼 **LinkedIn:** [LINKEDIN_LINK]
 - 🌐 **Portfolio:** [PORTFOLIO_LINK]
 - 📧 **Email:** [EMAIL]
+=======
+SRM Institute of Science and Technology (POY of 2027)
+
+- 🐙 **GitHub:** [github.com/Shrikaran202005](https://github.com/Shrikaran202005)
+- 💼 **LinkedIn:** [LINKEDIN_LINK](https://www.linkedin.com/in/shrikaran-p/)
+- 🌐 **Portfolio:** [PORTFOLIO_LINK](https://shrikaran.netlify.app/)
+- 📧 **Email:** [EMAIL](shrikaran2017@gmail.com)
+>>>>>>> 7e6cd309642f878d65690cbcb44758bfc85e5320
 
 ---
 
